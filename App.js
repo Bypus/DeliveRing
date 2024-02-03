@@ -9,6 +9,7 @@ import {
     TouchableOpacity,
     Image,
     Platform, TextInput,
+    BackHandler,
 } from 'react-native';
 
 import {CheckBox} from 'react-native-elements';
@@ -23,6 +24,20 @@ export default function App() {
     const [isCommandDone, setIsCommandDone] = React.useState(false)
     const [cart, setCart] = React.useState([])
     const [selectedRune, setSelectedRune] = React.useState()
+
+    useEffect(() => {
+        const backAction = () => {
+            if (selectedRune) {
+                setSelectedRune(null);
+                return true; // This will prevent the app from exiting
+            }
+            return false; // This will cause the app to exit
+        };
+
+        const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+
+        return () => backHandler.remove();
+    }, [selectedRune]);
 
     var greatRunes = [
         {
@@ -108,7 +123,7 @@ export default function App() {
                 </View>
 
                 <Image
-                    style={{ resizeMode: 'contain', width: '50%', height: '50%'}}
+                    style={{resizeMode: 'contain', width: '50%', height: '50%'}}
                     source={require('./resources/ER_golden_order.png')}
                 />
 
@@ -134,32 +149,30 @@ export default function App() {
         const totalPrice = cart.reduce((total, item) => total + item.price, 0);
 
         return (
-                <View
-                    style={{
-                        flex: 1,
-                        backgroundColor: '#D8D2B0',
-                    }}>
-                    <StatusBar hidden={true}/>
-                    <View style={styles.menu}>
-                        <Text style={{fontWeight: 'bold'}}>
-                            DeliveRing
-                        </Text>
-                        <TouchableOpacity
-                            style={styles.retourMenu}
-                            onPress={() => {
-                                setIsCartShown(false)
-                                setIsHomeShown(true)
-                            }}>
-                            <Text style={{
-                                fontSize: 15,
-                                margin: 5,
-                                color: 'white',
-                            }}>Retour</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <ScrollView>
-
-
+            <View
+                style={{
+                    flex: 1,
+                    backgroundColor: '#D8D2B0',
+                }}>
+                <StatusBar hidden={true}/>
+                <View style={styles.menu}>
+                    <Text style={{fontWeight: 'bold'}}>
+                        DeliveRing
+                    </Text>
+                    <TouchableOpacity
+                        style={styles.retourMenu}
+                        onPress={() => {
+                            setIsCartShown(false)
+                            setIsHomeShown(true)
+                        }}>
+                        <Text style={{
+                            fontSize: 15,
+                            margin: 5,
+                            color: 'white',
+                        }}>Retour</Text>
+                    </TouchableOpacity>
+                </View>
+                <ScrollView>
 
                     {cart.map((item, index) => (
                         <View
@@ -201,13 +214,11 @@ export default function App() {
                                     }}
                                     onPress={() => removeFromCart(index)}>
                                     <Text style={{color: 'white'}}>x</Text>
-
                                 </TouchableOpacity>
                             </View>
                         </View>
                     ))}
                     <Text style={{margin: 10}}>Total: {totalPrice} âmes</Text>
-
                     <View style={{padding: 20}}>
                         <Text style={{fontSize: 18, fontWeight: 'bold', marginBottom: 10}}>
                             Adresse de livraison :
@@ -224,22 +235,19 @@ export default function App() {
                             onChangeText={(text) => setDeliveryAddress(text)}
                         />
                     </View>
-                        <View style={{height: 100}}/>
-
-                    </ScrollView>
-
-                    <TouchableOpacity
-                        style={styles.floatingButton}
-                        onPress={() => {
-                            setIsCartShown(false);
-                            setIsCommandDone(true);
-                            setCart([])
-                        }}
-                    >
-                        <Text style={styles.buttonText}>Passer la commande</Text>
-                    </TouchableOpacity>
-                </View>
-
+                    <View style={{height: 100}}/>
+                </ScrollView>
+                <TouchableOpacity
+                    style={styles.floatingButton}
+                    onPress={() => {
+                        setIsCartShown(false);
+                        setIsCommandDone(true);
+                        setCart([])
+                    }}
+                >
+                    <Text style={styles.buttonText}>Passer la commande</Text>
+                </TouchableOpacity>
+            </View>
         )
     }
 
@@ -344,8 +352,6 @@ export default function App() {
                                 setSelectedRune(item)
                                 const updatedCheckboxStates = [...checkboxStates];
                                 updatedCheckboxStates[index] = !updatedCheckboxStates[index];
-                                // setCheckboxStates(updatedCheckboxStates);
-                                // setCart([...cart, selectedRune])
                             }}
                         >
                             <View style={styles.itemContainer}>
@@ -365,13 +371,11 @@ export default function App() {
                                     <View style={styles.textNoCheckbox}>
 
                                         <Text style={{fontWeight: 'bold'}}>{item.name}</Text>
-                                        {/* <Text>{item.price} $</Text> */}
-                                        <Text>{item.description}</Text>
+                                        <Text style={{ fontSize: 13 }}>{item.description}</Text>
                                     </View>
                                 </View>
                                 <View style={styles.checkbox}>
                                     <CheckBox
-
                                         checked={checkboxStates[index]}
                                         onPress={() => {
                                             const updatedCheckboxStates = [...checkboxStates];
@@ -418,11 +422,11 @@ const styles = StyleSheet.create({
     itemContainer: {
         backgroundColor: '#D8D2B0',
         width: 190, // Permet d'afficher deux éléments par ligne avec un espace entre eux
-        height: 250,
         marginBottom: 10, // Espace vertical entre les éléments
         elevation: 8,
         borderColor: 'gray',
         borderRadius: 5,
+        minHeight: 275,
     },
     menu: {
         fontWeight: 'bold',
@@ -439,7 +443,7 @@ const styles = StyleSheet.create({
                 shadowColor: 'black',
                 shadowOffset: {width: 0, height: 2},
                 shadowOpacity: 0.5,
-                shadowRadius: 4,
+                shadowRadius: 2,
             },
             android: {
                 elevation: 8,
